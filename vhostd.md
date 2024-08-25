@@ -375,6 +375,24 @@ In virtio-net controller configuration file /opt/mellanox/mlnx_virtnet/virtnet.c
 
   Solution: Add pci=realloc,assign-busses to /proc/cmdline.
 
+* Vnet controller or vblk snap containeer crash could happens if user confused between attached vnet or vblk vdpa devices to vm with wrong uuid. User should guarantee same uuid VFs belong to same VM.
+
+ Example of vnet controller error:
+       [ERROR] host/virtnet_dpa.c:78:virtnet_cmd_q_invoke: Failed to generate core, err(2)
+       [ERROR] host/virtnet_dpa_aarfs.c:37:virtnet_dpa_aarfs_sync_timer: Failed to call cmd queue invoke, err(-110)
+ 
+ Example of vblk containeer error:
+       posix.c:1032:posix_sock_create: *ERROR*: connect() failed, errno = 113
+       Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+       ==== backtrace (tid:     11) ====
+       =================================
+       /usr/bin/entrypoint.sh: line 83:    11 Segmentation fault      (core dumped) /opt/nvidia/nvda_snap/bin/snap_service
+ 
+ Solution: validate socket -u <vm_id> connected to vm with same id
+       vfe-vhost-cli   vf -v /tmp/sock-blk-0 -u ee8b6429-eb1e-45e7-9dab-aff843b99075 -a 0000:83:04.5;
+
+
+
 # Reference
 For NVIDIA BlueField virtio-net PCIe devices and NVIDIA BlueField-3 virtio-blk configuration, Please refer lastest document in [BlueField DPUs / SuperNICs & DOCA](https://docs.nvidia.com/networking/dpu-doca/index.html#doca):
 
